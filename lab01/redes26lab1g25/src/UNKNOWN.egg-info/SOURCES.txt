@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+src/__init__.py
+src/app.py
+src/auth.py
+src/auth_common.py
+src/filtros.py
+src/juegos.py
+src/store.py
+src/sugerencias.py
+src/usuarios.py
+src/wikidata.py
+src/UNKNOWN.egg-info/PKG-INFO
+src/UNKNOWN.egg-info/SOURCES.txt
+src/UNKNOWN.egg-info/dependency_links.txt
+src/UNKNOWN.egg-info/top_level.txt
+tests/test_metrics.py
