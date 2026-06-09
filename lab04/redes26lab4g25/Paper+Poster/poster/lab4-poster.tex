@@ -1,0 +1,357 @@
+% =============================================================================
+% Plantilla de POSTER — Laboratorio 4: Capa de Red (OMNeT++)
+% Cátedra de Redes y Sistemas Distribuidos — FaMAF/UNC
+%
+% Tamaño: A0 vertical (84,1 cm × 118,9 cm) — dos columnas.
+% Logos: figuras/logos/unc-escudo-famaf.png, figuras/logos/logo-famaf.png
+%
+% Compilación (desde esta carpeta):
+%   pdflatex lab4-poster.tex
+%   pdflatex lab4-poster.tex   % segunda pasada recomendada
+%
+% Requiere la carpeta figuras/logos/ con los archivos indicados abajo.
+% =============================================================================
+
+\documentclass[final]{beamer}
+
+\usepackage[size=a0,orientation=portrait,scale=1.14]{beamerposter}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfplotsset{
+  every axis/.append style={
+    tick label style={font=\large},
+    label style={font=\Large},
+    title style={font=\Large},
+    legend style={font=\large},
+  }
+}
+\usetikzlibrary{arrows.meta,calc,positioning,shapes.geometric}
+
+% --- Datos del grupo ------------------------------------------------------------
+\newcommand{\TituloPoster}{Routing Strategies for Ring and General Topologies in}
+\newcommand{\TituloPosterLinea}{OMNeT++}
+
+\newcommand{\IntegrantesPoster}{Gerbaudo, Nicolás Ignacio \and Jorge González, Nicolás \and Ontivero, Nahuel Mauricio \and Vides, Alejo Miguel}
+\newcommand{\GrupoPoster}{Grupo 25}
+
+% --- Logos (descargados de unc.edu.ar y famaf.unc.edu.ar) -----------------------
+% Logos: unc-escudo-famaf.png = escudo UNC con fondo #064F63 (encabezado)
+\newcommand{\LogoUNC}{figuras/logos/unc-escudo-famaf.png}
+\newcommand{\LogoFAMAF}{figuras/logos/logo-famaf.png}
+
+% --- Paleta (armonizada con logo FaMAF #0B8BAB) ---------------------------------
+\definecolor{FamafPrimary}{HTML}{0B8BAB}   % color del logo
+\definecolor{FamafDark}{HTML}{064F63}      % encabezado y pie
+\definecolor{FamafMedium}{HTML}{087A96}    % variantes en gráficos
+\definecolor{FamafLight}{HTML}{E8F5F9}     % fondos de bloques
+\definecolor{FamafAccent}{HTML}{E8A838}    % acento cálido (alertas, año)
+\definecolor{TextDark}{HTML}{2C3E50}
+
+\title{\TituloPoster\\[0.4cm]\TituloPosterLinea}
+\author{\IntegrantesPoster}
+
+% --- Estilo beamer --------------------------------------------------------------
+\usetheme{default}
+\setbeamercolor{headline}{bg=FamafDark,fg=white}
+\setbeamercolor{author in head/foot}{bg=FamafDark,fg=white}
+\setbeamercolor{block title}{bg=FamafPrimary,fg=white}
+\setbeamercolor{block body}{bg=FamafLight,fg=TextDark}
+\setbeamercolor{item}{fg=FamafPrimary}
+\setbeamercolor{block alerted title}{bg=FamafAccent,fg=white}
+\setbeamercolor{block alerted body}{bg=FamafLight,fg=TextDark}
+
+\setbeamerfont{title}{size=\VeryHuge,series=\bfseries}
+\setbeamerfont{author}{size=\Large}
+\setbeamerfont{block title}{size=\LARGE,series=\bfseries}
+\setbeamerfont{block alerted title}{size=\LARGE,series=\bfseries}
+\setbeamerfont{block body}{size=\large}
+\setbeamerfont{itemize/enumerate body}{size=\large}
+
+% Encabezado (compatible con una sola compilación)
+\setbeamertemplate{headline}{%
+  \begin{beamercolorbox}[wd=\paperwidth,leftskip=1.6cm,rightskip=1.4cm,sep=0.65cm]{headline}
+    \begin{columns}[T,totalwidth=\textwidth]
+      \begin{column}{0.13\textwidth}
+        \centering
+        \includegraphics[height=4.6cm,keepaspectratio]{\LogoUNC}
+      \end{column}
+      \begin{column}{0.70\textwidth}
+        \centering
+        {\fontsize{44}{52}\selectfont\bfseries \TituloPoster\par}
+        \vspace{0.2cm}
+        {\fontsize{52}{58}\selectfont\bfseries\textcolor{FamafPrimary}{\TituloPosterLinea}\par}
+        \vspace{0.35cm}
+        {\LARGE\textbf{Laboratorio 4 — Capa de Red}\par}
+        \vspace{0.55cm}
+        {\Large\insertauthor\par}
+        \vspace{0.25cm}
+        {\large\textcolor{white!92}{\GrupoPoster \ $\bullet$ \ FaMAF/UNC}\par}
+      \end{column}
+      \begin{column}{0.13\textwidth}
+        \centering
+        \includegraphics[height=4.3cm,keepaspectratio]{\LogoFAMAF}
+      \end{column}
+    \end{columns}
+  \end{beamercolorbox}
+}
+
+% Pie de página
+\setbeamertemplate{footline}{%
+  \begin{beamercolorbox}[wd=\paperwidth,leftskip=2.5cm,rightskip=2.5cm,sep=0.85cm,dp=1.2ex]{author in head/foot}
+    \begin{columns}[T,totalwidth=\textwidth]
+      \begin{column}{0.62\textwidth}
+        \Large\textbf{Defensa en clase:} objetivos, evidencia, algoritmo, mejoras cuantificadas y conclusiones.
+      \end{column}
+      \begin{column}{0.36\textwidth}
+        \raggedleft\Large
+        \textcolor{FamafPrimary}{\textbf{FaMAF/UNC}} — Redes y Sist.\ Distribuidos\\
+        \textcolor{FamafAccent}{\textbf{2026}}
+      \end{column}
+    \end{columns}
+  \end{beamercolorbox}
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\newcommand{\RingTopology}{%
+  \begin{tikzpicture}[
+    ring node/.style={
+      circle, draw=FamafPrimary, thick, fill=white,
+      minimum size=10mm, inner sep=0pt,
+      font=\normalsize\bfseries
+    },
+    fwd link/.style={
+      ->, >=Stealth, thick, draw=FamafDark!85!black,
+      shorten >=2mm, shorten <=2mm
+    },
+  ]
+    \def\radius{1.7}
+    \foreach \i in {0,...,7} {
+      \pgfmathsetmacro{\nodeangle}{90 - 45*\i}
+      \node[ring node] (n\i) at (\nodeangle:\radius) {\i};
+    }
+    \draw[gray!35, dashed, line width=0.5pt] (0,0) circle (\radius);
+    \foreach \i/\j in {0/1,1/2,2/3,3/4,4/5,5/6,6/7,7/0} {
+      \draw[fwd link] (n\i) -- (n\j);
+    }
+  \end{tikzpicture}
+}
+
+\begin{document}
+\begin{frame}[t]
+
+\begin{columns}[T,totalwidth=0.96\paperwidth]
+
+% =============================================================================
+% COLUMNA IZQUIERDA — contexto, modelo y análisis
+% =============================================================================
+\begin{column}{0.42\paperwidth}
+  \hspace{0.5cm}
+
+  \begin{block}{Motivación y objetivos}
+    \begin{itemize}
+      \item \textbf{Problema:} enrutamiento en capa de red con múltiples interfaces en anillo de 8 nodos.
+      \item \textbf{Baseline:} kickstarter reenvía siempre por \texttt{toLnk[0]} (sentido horario), dejando la mitad de la capacidad sin usar.
+      \item \textbf{Objetivo:} analizar las limitaciones del baseline, diseñar una estrategia mejor y comparar con datos cuantitativos.
+      \item \textbf{Herramienta:} OMNeT++ — 8 nodos, tráfico configurable.
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.45cm}
+
+  \begin{alertblock}{Mensaje clave}
+      Nuestro algoritmo reduce la demora media al elegir en ambas direcciones a diferenciar del kickstarter, esto es muy evidente en las métricas del Caso 1, y en el Caso 2 se evidencia la diferencia en la ocupación de los buffers.
+  \end{alertblock}
+
+  \vspace{0.45cm}
+
+  \begin{block}{Modelo de simulación}
+    \centering
+    \RingTopology\\[0.3cm]
+    {\Large Topología en anillo — 8 nodos}
+    \vspace{0.35cm}
+    \raggedright
+    \textbf{Capas:} \texttt{app} $\rightarrow$ \texttt{net} $\rightarrow$ \texttt{lnk[0,1]}\\
+    \textbf{Métricas:} demora E2E, saltos/paquete, ocupación de buffers, utilización de enlaces, paquetes reenviados por nodo.
+  \end{block}
+
+  \vspace{0.45cm}
+
+  \begin{block}{Análisis — Caso 1}
+    \textbf{Fuentes:} \texttt{node[0]} y \texttt{node[2]} $\rightarrow$ \texttt{node[5]}, \texttt{iat}=exp(1)\,s
+
+    \vspace{0.5cm}
+    \large
+    \renewcommand{\arraystretch}{1.2}
+    \centering
+    \begin{tabular}{@{}lrr@{}}
+      \toprule
+      \textbf{Métrica} & \textbf{Prom.} & \textbf{Máx.} \\
+      \midrule
+      Demora (s)   & 51.16 & 105.56 \\
+      Saltos       & 3.92  & 5.00 \\
+      Buffer (pkts)& 92.92 & 190.00 \\
+      Enlace (\%)  & 99.50  & 99.50 \\
+      \bottomrule
+    \end{tabular}
+
+    \vspace{0.6cm}
+    \raggedright
+    El enlace \texttt{node[0].lnk[0]} opera al \textbf{99.5\%} con buffer medio de \textbf{92.9 paquetes}: saturación sostenida. Todas las interfaces \texttt{lnk[1]} permanecen \textbf{inactivas}.
+
+  \end{block}
+
+  \vspace{0.45cm}
+
+  \begin{block}{Análisis — Caso 2}
+    \vspace{0.4cm}
+    \centering
+    \begin{tikzpicture}
+      \begin{axis}[
+        width=0.9\linewidth,
+        height=5.8cm,
+        xlabel={\texttt{interArrivalTime} (s)},
+        ylabel={Demora media (s)},
+        xmin=0.3, xmax=10.6,
+        xtick={0.5,1,2,3,5,7,8,10},
+        ymin=0,
+        grid=major,
+        title={Estabilidad vs.\ carga ofrecida},
+        legend to name=legCaso2,
+        legend style={draw=FamafPrimary!40, fill=white, font=\large},
+      ]
+        \addplot[thick, FamafPrimary, mark=*, mark size=3pt] coordinates {
+          (0.5,73.19)(1,65.92)(2,61.43)(3,59.25)(5,34.01)(7,7.16)(8,5.56)(10,4.71)
+        };
+        \addlegendentry{Demora E2E}
+        \addplot[thick, FamafAccent, dashed] coordinates {(7,0)(7,75)};
+        \addlegendentry{Umbral estabilidad (iat=7\,s)}
+      \end{axis}
+    \end{tikzpicture}
+
+    \vspace{0.35cm}
+    \pgfplotslegendfromname{legCaso2}
+
+    \vspace{0.75cm}
+    \raggedright
+    \textbf{Umbral:} \texttt{interArrivalTime} $\geq$ \textbf{7\,s} — para valores menores al menos un buffer crece indefinidamente (máx.\ 410 paquetes a iat=0.5\,s).
+  \end{block}
+
+\end{column}
+
+% =============================================================================
+% COLUMNA DERECHA — diseño, evaluación y conclusiones
+% =============================================================================
+\begin{column}{0.42\paperwidth}
+
+  \begin{block}{Algoritmo propuesto}
+    \begin{itemize}
+      \item Calcula distancia al destino en \textbf{ambas direcciones} del anillo usando el índice del nodo.
+      \item Elige la interfaz del \textbf{camino más corto}.
+      \item En caso de \textbf{empate}, desempata por congestión: elige el buffer con menor ocupación.
+      \item Sin mensajes de control adicionales — toda la información viaja en cada paquete o se consulta localmente.
+    \end{itemize}
+    \vspace{0.3cm}
+    {\Large\ttfamily
+    al recibir paquete p:\\[0.12cm]
+    \quad si dest(p) == local: entregar a app\\[0.12cm]
+    \quad sino: calcular dist\_lnk0, dist\_lnk1\\[0.12cm]
+    \quad\quad si dist\_lnk0 < dist\_lnk1: enviar por lnk[0]\\[0.12cm]
+    \quad\quad si dist\_lnk1 < dist\_lnk0: enviar por lnk[1]\\[0.12cm]
+    \quad\quad sino: enviar por lnk con menor congestión
+    }
+  \end{block}
+
+  \vspace{0.45cm}
+
+  \begin{block}{Evaluación comparativa}
+    \vspace{0.4cm}
+    \centering
+    \begin{tikzpicture}
+      \begin{axis}[
+        width=0.9\linewidth,
+        height=5.8cm,
+        ybar,
+        bar width=22pt,
+        ymin=0,
+        ymax=80,
+        enlarge x limits=0.25,
+        symbolic x coords={Kickstarter,Propuesto},
+        xtick=data,
+        x tick label style={font=\large},
+        ylabel={Demora media (s)},
+        title={Caso 1 — demora E2E},
+        nodes near coords,
+        nodes near coords align={vertical},
+        every node near coord/.append style={font=\large},
+      ]
+        \addplot[fill=FamafDark!75] coordinates {(Kickstarter,51.16)};
+        \addplot[fill=FamafPrimary!80] coordinates {(Propuesto,6.90)};
+      \end{axis}
+    \end{tikzpicture}
+
+    \vspace{0.5cm}
+
+    \begin{tikzpicture}
+      \begin{axis}[
+        width=0.9\linewidth,
+        height=5.8cm,
+        xmin=0.3, xmax=10.6,
+        ymin=0,
+        grid=major,
+        xlabel={\texttt{interArrivalTime} (s)},
+        ylabel={Demora media (s)},
+        title={Caso 2 — demora E2E vs.\ carga},
+        xtick={0.5,1,2,3,5,7,8,10},
+        legend style={font=\large, at={(0.5,0.99)}, anchor=north, legend columns=-1},
+      ]
+        \addplot[thick, FamafDark!85, mark=*, mark size=2.8pt] coordinates {
+          (0.5,73.19)(1,65.92)(2,61.43)(3,59.25)(5,34.01)(7,7.16)(8,5.56)(10,4.71)
+        };
+        \addplot[thick, FamafPrimary, mark=square*, mark size=2.8pt] coordinates {
+          (0.5,74.06)(1,64.16)(2,43.22)(3,20.14)(5,4.83)(7,2.78)(8,2.70)(10,2.58)
+        };
+        \legend{Kickstarter, Propuesto}
+      \end{axis}
+    \end{tikzpicture}
+
+    \vspace{0.75cm}
+    \raggedright
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{@{}lrrrr@{}}
+      \toprule
+      \textbf{Escenario} & \textbf{Dem. KS (s)} & \textbf{Dem. Prop. (s)} & \textbf{Mejora} & \textbf{Saltos} \\
+      \midrule
+      Caso 1            & 51.16 & 6.90 & $-86.5\%$ & $-23.5\%$ \\
+      C2, iat=2\,s      & 61.43 & 43.22 & $-29.7\%$ & $-22.7\%$ \\
+      C2, iat=5\,s      & 34.01 & 4.83  & $-85.8\%$ & $-40.7\%$ \\
+      C2, iat=7\,s      & 7.16  & 2.78  & $-61.2\%$ & $-39.4\%$ \\
+      C2, iat=10\,s     & 4.71  & 2.58  & $-45.2\%$ & $-41.3\%$ \\
+      \bottomrule
+    \end{tabular}
+  \end{block}
+
+  \vspace{0.45cm}
+
+  \begin{alertblock}{Conclusiones}
+    \begin{itemize}
+      \item El baseline satura \texttt{node[0].lnk[0]} (99.5\%, buffer medio 92.9 pkts) ignorando \texttt{lnk[1]}.
+      \item El algoritmo propuesto aprovecha ambas direcciones: reduce la demora un \textbf{86.5\%} en Caso 1 y en el Caso 2 baja la ocupación de los buffers hasta un \textbf{85.8\%}.
+      \item \textbf{Sin bucles:} La topología de anillo solo nos permite ir en dos direcciones, elegir cualquiera de los dos caminos garantiza avance hacia el destino excepto en el caso de nodos críticos.
+      \item \textbf{Escalabilidad:} costo de decisión $O(1)$; la ventaja crece con el número de nodos.
+      \item \textbf{Limitación:} El algoritmo propuesto no soluciona la vulnerabilidad de fallas de nodos críticos.
+    \end{itemize}
+  \end{alertblock}
+
+\end{column}
+
+\end{columns}
+
+\end{frame}
+\end{document}
